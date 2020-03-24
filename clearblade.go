@@ -53,7 +53,7 @@ func authWithDevice() error {
 }
 
 func authWithServiceAccount() error {
-	log.Println("[INFO] authWithDevice - Authenticating with ClearBlade Edge or Platform using a Service Account")
+	log.Println("[INFO] authWithServiceAccount - Authenticating with ClearBlade Edge or Platform using a Service Account")
 	deviceClient = cb.NewDeviceClientWithServiceAccountAndAddrs(args.PlatformURL, args.MessagingURL, args.SystemKey, args.SystemSecret, args.ServiceAccount, args.ServiceAccountToken)
 	return nil
 }
@@ -72,8 +72,10 @@ func fetchAdapterConfig() (*AdapterConfig, error) {
 	log.Println("[DEBUG] fetchAdapterConfig - Executing query against table " + args.AdapterConfigCollection)
 	results, err := deviceClient.GetDataByName(args.AdapterConfigCollection, query)
 	if err != nil {
-		log.Println("[DEBUG] fetchAdapterConfig - Adapter configuration could not be retrieved. Using defaults")
 		log.Printf("[ERROR] fetchAdapterConfig - Error retrieving adapter configuration: %s\n", err.Error())
+		log.Println("[ERROR] fetchAdapterConfig - Retrying in 30 seconds...")
+		time.Sleep(time.Second * 30)
+		return fetchAdapterConfig()
 	} else {
 		data := results["DATA"].([]interface{})
 		if len(data) > 0 {
