@@ -41,6 +41,7 @@ func Publish(topic string, message []byte) error {
 
 func authWithDevice() error {
 	log.Println("[INFO] authWithDevice - Authenticating with ClearBlade Edge or Platform as a Device")
+	log.Println("[ERROR] authWithDevice - This functionality is depreciated! Please use a Device Service Account instead")
 	deviceClient = cb.NewDeviceClientWithAddrs(args.PlatformURL, args.MessagingURL, args.SystemKey, args.SystemSecret, args.DeviceName, args.ActiveKey)
 
 	for err := deviceClient.Authenticate(); err != nil; {
@@ -115,7 +116,10 @@ func initMQTT(topicToSubscribe string, messageReceivedCallback MQTTMessageReceiv
 }
 
 func onConnectLost(client mqtt.Client, connerr error) {
-	log.Printf("[INFO] onConnectLost - Connection to MQTT broker was lost: %s\n", connerr.Error())
+	log.Printf("[ERROR] onConnectLost - Connection to MQTT broker was lost: %s\n", connerr.Error())
+	if args.ServiceAccount == "" {
+		log.Fatalln("[FATAL] onConnectLost - MQTT Connection was lost and no Device Service Account is being used. Stopping Adapter to force device reauth (this can be avoided by using Device Service Accounts)")
+	}
 }
 
 func onConnect(client mqtt.Client) {
