@@ -76,28 +76,28 @@ func fetchAdapterConfig() (*AdapterConfig, error) {
 		log.Println("[ERROR] fetchAdapterConfig - Retrying in 30 seconds...")
 		time.Sleep(time.Second * 30)
 		return fetchAdapterConfig()
-	} else {
-		data := results["DATA"].([]interface{})
-		if len(data) > 0 {
-			log.Println("[INFO] fetchAdapterConfig - Adapter config retrieved")
-			configData := data[0].(map[string]interface{})
-
-			//MQTT topic root
-			if configData["topic_root"] != nil && configData["topic_root"] != "" {
-				config.TopicRoot = configData["topic_root"].(string)
-			}
-			log.Printf("[DEBUG] fetchAdapterConfig - TopicRoot set to %s\n", config.TopicRoot)
-
-			//adapter_settings
-			if configData["adapter_settings"] != nil {
-				config.AdapterSettings = configData["adapter_settings"].(string)
-			} else {
-				log.Println("[INFO] fetchAdapterConfig - Settings are nil.")
-			}
-		} else {
-			log.Println("[INFO] fetchAdapterConfig - No rows returned. Using defaults")
-		}
 	}
+	data := results["DATA"].([]interface{})
+	if len(data) > 0 {
+		log.Println("[INFO] fetchAdapterConfig - Adapter config retrieved")
+		configData := data[0].(map[string]interface{})
+
+		//MQTT topic root
+		if configData["topic_root"] != nil && configData["topic_root"] != "" {
+			config.TopicRoot = configData["topic_root"].(string)
+		}
+		log.Printf("[DEBUG] fetchAdapterConfig - TopicRoot set to %s\n", config.TopicRoot)
+
+		//adapter_settings
+		if configData["adapter_settings"] != nil {
+			config.AdapterSettings = configData["adapter_settings"].(string)
+		} else {
+			log.Println("[INFO] fetchAdapterConfig - Settings are nil.")
+		}
+	} else {
+		log.Println("[INFO] fetchAdapterConfig - No rows returned. Using defaults")
+	}
+
 	log.Printf("[DEBUG] fetchAdapterConfig - Successfully received and parsed adapter config: %+v\n", config)
 	return config, nil
 }
@@ -107,6 +107,7 @@ func initMQTT(topicToSubscribe string, messageReceivedCallback MQTTMessageReceiv
 	topic = topicToSubscribe
 	mqttCallback = messageReceivedCallback
 	callbacks := cb.Callbacks{OnConnectionLostCallback: onConnectLost, OnConnectCallback: onConnect}
+	rand.Seed(time.Now().UnixNano())
 	if err := deviceClient.InitializeMQTTWithCallback(args.DeviceName+"-"+strconv.Itoa(rand.Intn(10000)), "", 30, nil, nil, &callbacks); err != nil {
 		return fmt.Errorf("Failed to initialize MQTT connection: %s", err.Error())
 	}
