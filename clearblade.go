@@ -17,6 +17,7 @@ var (
 	deviceClient *cb.DeviceClient
 	topic        string
 	mqttCallback MQTTMessageReceived
+	connChannel  chan struct{}
 )
 
 type AdapterConfig struct {
@@ -26,12 +27,16 @@ type AdapterConfig struct {
 
 type MQTTMessageReceived func(*mqttTypes.Publish)
 
-func ConnectMQTT(topic string, mqttCallback MQTTMessageReceived) error {
+func ConnectMQTT(t string, mqttCB MQTTMessageReceived) error {
 	log.Println("[INFO] ConnectMQTT - initializing and connecting to ClearBlade MQTT broker")
-	err := initMQTT(topic, mqttCallback)
-	if err != nil {
-		return err
+	topic = t
+	mqttCallback = mqttCB
+	callbacks := cb.Callbacks{OnConnectionLostCallback: onConnectLost, OnConnectCallback: onConnect}
+	connChannel = make(chan struct{})
+	if err := deviceClient.InitializeMQTTWithCallback(args.DeviceName+"-"+strconv.Itoa(rand.Intn(10000)), "", 30, nil, nil, &callbacks); err != nil {
+		return fmt.Errorf("Failed to initialize MQTT connection: %s", err.Error())
 	}
+	<-connChannel
 	return nil
 }
 
@@ -103,18 +108,6 @@ func fetchAdapterConfig() (*AdapterConfig, error) {
 	return config, nil
 }
 
-func initMQTT(topicToSubscribe string, messageReceivedCallback MQTTMessageReceived) error {
-	log.Println("[INFO] initMQTT - Initializing MQTT")
-	topic = topicToSubscribe
-	mqttCallback = messageReceivedCallback
-	callbacks := cb.Callbacks{OnConnectionLostCallback: onConnectLost, OnConnectCallback: onConnect}
-	rand.Seed(time.Now().UnixNano())
-	if err := deviceClient.InitializeMQTTWithCallback(args.DeviceName+"-"+strconv.Itoa(rand.Intn(10000)), "", 30, nil, nil, &callbacks); err != nil {
-		return fmt.Errorf("Failed to initialize MQTT connection: %s", err.Error())
-	}
-	return nil
-}
-
 func onConnectLost(client mqtt.Client, connerr error) {
 	log.Printf("[ERROR] onConnectLost - Connection to MQTT broker was lost: %s\n", connerr.Error())
 	if args.ServiceAccount == "" {
@@ -124,7 +117,7 @@ func onConnectLost(client mqtt.Client, connerr error) {
 
 func onConnect(client mqtt.Client) {
 	log.Println("[INFO] OnConnect - Connected to ClearBlade Platform MQTT broker")
-
+	connChannel <- struct{}{}
 	if topic != "" && mqttCallback != nil {
 		// this is a bit fragile, relying on a specific error message text to check if error was lack of permissions or not, it it's not we want to retry,
 		// but if it is we want to quit out because this won't ever work

@@ -4,7 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
+	"time"
 )
 
 const (
@@ -100,6 +102,8 @@ func ParseArguments(adapterName string) error {
 
 func Initialize() (*AdapterConfig, error) {
 	log.Println("[INFO] Initialize - Adapter Library running needed inits")
+
+	rand.Seed(time.Now().UnixNano())
 
 	// auth with edge/platform
 	if args.ServiceAccount != "" {
