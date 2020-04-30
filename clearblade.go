@@ -49,11 +49,11 @@ func authWithDevice() error {
 	log.Println("[ERROR] authWithDevice - This functionality is depreciated! Please use a Device Service Account instead")
 	deviceClient = cb.NewDeviceClientWithAddrs(args.PlatformURL, args.MessagingURL, args.SystemKey, args.SystemSecret, args.DeviceName, args.ActiveKey)
 
-	for err := deviceClient.Authenticate(); err != nil; {
+	for _,err := deviceClient.Authenticate(); err != nil; {
 		log.Printf("[ERROR] authWithDevice - Error authenticating: %s\n", err.Error())
 		log.Println("[ERROR] authWithDevice - Will retry in 1 minute...")
 		time.Sleep(time.Duration(time.Minute * 1))
-		err = deviceClient.Authenticate()
+		_,err = deviceClient.Authenticate()
 	}
 	return nil
 }
