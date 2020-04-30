@@ -66,9 +66,14 @@ func fetchAdapterConfig() (*AdapterConfig, error) {
 
 	//Retrieve the adapter configuration row
 	query := cb.NewQuery()
-	query.EqualTo("adapter_name", args.DeviceName)
+	if args.ServiceAccount != "" {
+		log.Printf("[DEBUG] fetchAdapterConfig - Fetching config row with adapter_name: %s\n", args.ServiceAccount)
+		query.EqualTo("adapter_name", args.ServiceAccount)
+	} else {
+		log.Printf("[DEBUG] fetchAdapterConfig - Fetching config row with adapter_name: %s\n", args.DeviceName)
+		query.EqualTo("adapter_name", args.DeviceName)
+	}
 
-	//A nil query results in all rows being returned
 	log.Println("[DEBUG] fetchAdapterConfig - Executing query against table " + args.AdapterConfigCollection)
 	results, err := deviceClient.GetDataByName(args.AdapterConfigCollection, query)
 	if err != nil {
