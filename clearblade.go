@@ -48,7 +48,7 @@ func authWithDevice() error {
 	log.Println("[INFO] authWithDevice - Authenticating with ClearBlade Edge or Platform as a Device")
 	log.Println("[ERROR] authWithDevice - This functionality is depreciated! Please use a Device Service Account instead")
 	deviceClient = cb.NewDeviceClientWithAddrs(args.PlatformURL, args.MessagingURL, args.SystemKey, args.SystemSecret, args.DeviceName, args.ActiveKey)
-	_, err := deviceClient.Authenticate()
+	err := deviceClient.Authenticate() //Ryan edited 5/23/21
 	return err
 }
 
