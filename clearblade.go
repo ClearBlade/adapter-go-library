@@ -54,7 +54,8 @@ func authWithDevice() error {
 
 func authWithServiceAccount() error {
 	log.Println("[INFO] authWithServiceAccount - Authenticating with ClearBlade Edge or Platform using a Service Account")
-	deviceClient = cb.NewDeviceClientWithServiceAccountAndAddrs(args.PlatformURL, args.MessagingURL, args.SystemKey, args.SystemSecret, args.ServiceAccount, args.ServiceAccountToken)
+	//TODO: UNCOMMENT
+	//deviceClient = cb.NewDeviceClientWithServiceAccountAndAddrs(args.PlatformURL, args.MessagingURL, args.SystemKey, args.SystemSecret, args.ServiceAccount, args.ServiceAccountToken)
 	return nil
 }
 
