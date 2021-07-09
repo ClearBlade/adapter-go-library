@@ -41,6 +41,7 @@ func main() {
 	// connect MQTT, if your adapter needs to subscribe to a topic, provide it as the first
 	// parameter, and a callback for when messages are received. if no need to subscribe,
 	// simply provide an empty string and nil
+	// ConnectMQTT will block until MQTT connection is successfully created
 	err = adapter_library.ConnectMQTT(adapterConfig.TopicRoot+"/outgoing/#", cbMessageHandler)
 	if err != nil {
 		log.Fatalf("[FATAL] Failed to Connect MQTT: %s\n", err.Error())

@@ -33,7 +33,7 @@ func ConnectMQTT(t string, mqttCB MQTTMessageReceived) error {
 	mqttCallback = mqttCB
 	callbacks := cb.Callbacks{OnConnectionLostCallback: onConnectLost, OnConnectCallback: onConnect}
 	connChannel = make(chan struct{})
-	if err := deviceClient.InitializeMQTTWithCallback(args.DeviceName+"-"+strconv.Itoa(rand.Intn(10000)), "", 30, nil, nil, &callbacks); err != nil {
+	if err := deviceClient.InitializeMQTTWithCallback(Args.DeviceName+"-"+strconv.Itoa(rand.Intn(10000)), "", 30, nil, nil, &callbacks); err != nil {
 		return fmt.Errorf("Failed to initialize MQTT connection: %s", err.Error())
 	}
 	<-connChannel
@@ -47,35 +47,35 @@ func Publish(topic string, message []byte) error {
 func authWithDevice() error {
 	log.Println("[INFO] authWithDevice - Authenticating with ClearBlade Edge or Platform as a Device")
 	log.Println("[ERROR] authWithDevice - This functionality is depreciated! Please use a Device Service Account instead")
-	deviceClient = cb.NewDeviceClientWithAddrs(args.PlatformURL, args.MessagingURL, args.SystemKey, args.SystemSecret, args.DeviceName, args.ActiveKey)
+	deviceClient = cb.NewDeviceClientWithAddrs(Args.PlatformURL, Args.MessagingURL, Args.SystemKey, Args.SystemSecret, Args.DeviceName, Args.ActiveKey)
 	_, err := deviceClient.Authenticate()
 	return err
 }
 
 func authWithServiceAccount() error {
 	log.Println("[INFO] authWithServiceAccount - Authenticating with ClearBlade Edge or Platform using a Service Account")
-	deviceClient = cb.NewDeviceClientWithServiceAccountAndAddrs(args.PlatformURL, args.MessagingURL, args.SystemKey, args.SystemSecret, args.ServiceAccount, args.ServiceAccountToken)
+	deviceClient = cb.NewDeviceClientWithServiceAccountAndAddrs(Args.PlatformURL, Args.MessagingURL, Args.SystemKey, Args.SystemSecret, Args.ServiceAccount, Args.ServiceAccountToken)
 	return nil
 }
 
 func fetchAdapterConfig() (*AdapterConfig, error) {
 	log.Println("[INFO] fetchAdapterConfig - Retrieving adapter config")
 	config := &AdapterConfig{
-		TopicRoot: args.DeviceName,
+		TopicRoot: Args.DeviceName,
 	}
 
 	//Retrieve the adapter configuration row
 	query := cb.NewQuery()
-	if args.ServiceAccount != "" {
-		log.Printf("[DEBUG] fetchAdapterConfig - Fetching config row with adapter_name: %s\n", args.ServiceAccount)
-		query.EqualTo("adapter_name", args.ServiceAccount)
+	if Args.ServiceAccount != "" {
+		log.Printf("[DEBUG] fetchAdapterConfig - Fetching config row with adapter_name: %s\n", Args.ServiceAccount)
+		query.EqualTo("adapter_name", Args.ServiceAccount)
 	} else {
-		log.Printf("[DEBUG] fetchAdapterConfig - Fetching config row with adapter_name: %s\n", args.DeviceName)
-		query.EqualTo("adapter_name", args.DeviceName)
+		log.Printf("[DEBUG] fetchAdapterConfig - Fetching config row with adapter_name: %s\n", Args.DeviceName)
+		query.EqualTo("adapter_name", Args.DeviceName)
 	}
 
-	log.Println("[DEBUG] fetchAdapterConfig - Executing query against table " + args.AdapterConfigCollection)
-	results, err := deviceClient.GetDataByName(args.AdapterConfigCollection, query)
+	log.Println("[DEBUG] fetchAdapterConfig - Executing query against table " + Args.AdapterConfigCollection)
+	results, err := deviceClient.GetDataByName(Args.AdapterConfigCollection, query)
 	if err != nil {
 		log.Printf("[ERROR] fetchAdapterConfig - Error retrieving adapter configuration: %s\n", err.Error())
 		log.Println("[ERROR] fetchAdapterConfig - Retrying in 30 seconds...")
@@ -109,7 +109,7 @@ func fetchAdapterConfig() (*AdapterConfig, error) {
 
 func onConnectLost(client mqtt.Client, connerr error) {
 	log.Printf("[ERROR] onConnectLost - Connection to MQTT broker was lost: %s\n", connerr.Error())
-	if args.ServiceAccount == "" {
+	if Args.ServiceAccount == "" {
 		log.Fatalln("[FATAL] onConnectLost - MQTT Connection was lost and no Device Service Account is being used. Stopping Adapter to force device reauth (this can be avoided by using Device Service Accounts)")
 	}
 }
@@ -135,7 +135,7 @@ func onConnect(client mqtt.Client) {
 		}
 		go cbMessageListener(cbSubChannel)
 	} else {
-		log.Println("[INFO] onConnect - no topic of mqtt callback supplied, will not subscribe to any MQTT topics")
+		log.Println("[INFO] onConnect - no topic or mqtt callback supplied, will not subscribe to any MQTT topics")
 	}
 }
 
