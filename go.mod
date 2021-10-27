@@ -1,4 +1,4 @@
-module adapter-go-library
+module github.com/clearblade/adapter-go-library
 
 go 1.16
 
