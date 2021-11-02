@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	cb "github.com/clearblade/Go-SDK/v3"
+	cb "github.com/clearblade/Go-SDK"
 	mqttTypes "github.com/clearblade/mqtt_parsing"
 	mqtt "github.com/clearblade/paho.mqtt.golang"
 )
