@@ -25,6 +25,12 @@ type AdapterConfig struct {
 	TopicRoot       string
 }
 
+type ConnectionStatus struct {
+	Pending      bool
+	Success      bool
+	ErrorMessage string
+}
+
 type MQTTMessageReceived func(*mqttTypes.Publish)
 
 func ConnectMQTT(t string, mqttCB MQTTMessageReceived) error {
@@ -105,6 +111,48 @@ func fetchAdapterConfig() (*AdapterConfig, error) {
 
 	log.Printf("[DEBUG] fetchAdapterConfig - Successfully received and parsed adapter config: %+v\n", config)
 	return config, nil
+}
+
+func SetConnectionStatus(status ConnectionStatus) error {
+	log.Println("[INFO] setConnectionStatus - Setting connection status")
+
+	//Retrieve the adapter configuration row
+	query := cb.NewQuery()
+	if Args.ServiceAccount != "" {
+		log.Printf("[DEBUG] setConnectionStatus - Fetching config row with adapter_name: %s\n", Args.ServiceAccount)
+		query.EqualTo("adapter_name", Args.ServiceAccount)
+	} else {
+		log.Printf("[DEBUG] setConnectionStatus - Fetching config row with adapter_name: %s\n", Args.DeviceName)
+		query.EqualTo("adapter_name", Args.DeviceName)
+	}
+
+	log.Println("[DEBUG] setConnectionStatus - Executing query against table " + Args.AdapterConfigCollection)
+	results, err := deviceClient.GetDataByName(Args.AdapterConfigCollection, query)
+	if err != nil {
+		log.Printf("[ERROR] setConnectionStatus - Error retrieving adapter configuration: %s\n", err.Error())
+		log.Println("[ERROR] setConnectionStatus - Retrying in 30 seconds...")
+		time.Sleep(time.Second * 30)
+		SetConnectionStatus(status)
+	}
+	data := results["DATA"].([]interface{})
+	changes := make(map[string]interface{})
+	if len(data) > 0 {
+		log.Println("[INFO] setConnectionStatus - Adapter config retrieved")
+
+		changes["connection_status"] = status
+
+		response, err := deviceClient.UpdateDataByName(Args.SystemKey, Args.AdapterConfigCollection, query, changes)
+		log.Printf("[INFO] setConnectionStatus - Updated %.0f row(s) in collection: %s", response.Count, Args.AdapterConfigCollection)
+		if err != nil {
+			log.Printf("[ERROR] setConnectionStatus - Error updating adapter configuration: %s\n", err.Error())
+			log.Println("[ERROR] setConnectionStatus - Retrying in 30 seconds...")
+			time.Sleep(time.Second * 30)
+			SetConnectionStatus(status)
+		}
+	}
+
+	log.Printf("[DEBUG] setConnectionStatus - Successfully received, parsed, and updated adapter config: %+v\n", changes)
+	return nil
 }
 
 func onConnectLost(client mqtt.Client, connerr error) {
