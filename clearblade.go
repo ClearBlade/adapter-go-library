@@ -132,14 +132,14 @@ func PublishStatus(topic string, json []byte) (mqtt.Token, error) {
 
 func onConnectLost(client mqtt.Client, connerr error) {
 	if Args.FatalOnDisconnect == "true" {
-		log.Fatalf("[ERROR] onConnectLost - Connection to MQTT broker was lost: %s\n", connerr.Error())
+		log.Fatalf("[FATAL] onConnectLost - Connection to MQTT broker was lost: %s\n", connerr.Error())
 		if Args.ServiceAccount == "" {
 			log.Fatalln("[FATAL] onConnectLost - MQTT Connection was lost and no Device Service Account is being used. Stopping Adapter to force device reauth (this can be avoided by using Device Service Accounts)")
 		}
 	} else {
 		log.Printf("[ERROR] onConnectLost - Connection to MQTT broker was lost: %s\n", connerr.Error())
 		if Args.ServiceAccount == "" {
-			log.Println("[FATAL] onConnectLost - MQTT Connection was lost and no Device Service Account is being used. Stopping Adapter to force device reauth (this can be avoided by using Device Service Accounts)")
+			log.Fatalln("[FATAL] onConnectLost - MQTT Connection was lost and no Device Service Account is being used. Stopping Adapter to force device reauth (this can be avoided by using Device Service Accounts)")
 		}
 	}
 }
