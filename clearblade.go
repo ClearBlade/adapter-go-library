@@ -31,15 +31,6 @@ type ConnectionStatus struct {
 	Timestamp    string `json:"timestamp"`
 }
 
-const (
-	ConnectionPending string = "ConnectionPending"
-	ConnectionFailed  string = "ConnectionFailed"
-	ConnectionSuccess string = "ConnectionSuccess"
-	BrowsePending     string = "BrowsePending"
-	BrowseFailed      string = "BrowseFailed"
-	BrowseSuccess     string = "BrowseSuccess"
-)
-
 type MQTTMessageReceived func(*mqttTypes.Publish)
 
 func ConnectMQTT(t string, mqttCB MQTTMessageReceived) error {
