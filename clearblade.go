@@ -26,10 +26,19 @@ type AdapterConfig struct {
 }
 
 type ConnectionStatus struct {
-	Pending      bool
-	Success      bool
-	ErrorMessage string
+	Status       string `json:"status"`
+	ErrorMessage string `json:"error_message,omitempty"`
+	Timestamp    string `json:"timestamp"`
 }
+
+const (
+	ConnectionPending string = "ConnectionPending"
+	ConnectionFailed  string = "ConnectionFailed"
+	ConnectionSuccess string = "ConnectionSuccess"
+	BrowsePending     string = "BrowsePending"
+	BrowseFailed      string = "BrowseFailed"
+	BrowseSuccess     string = "BrowseSuccess"
+)
 
 type MQTTMessageReceived func(*mqttTypes.Publish)
 
@@ -48,6 +57,10 @@ func ConnectMQTT(t string, mqttCB MQTTMessageReceived) error {
 
 func Publish(topic string, message []byte) error {
 	return deviceClient.Publish(topic, message, 0)
+}
+
+func PublishGetToken(topic string, message []byte) (mqtt.Token, error) {
+	return deviceClient.PublishGetToken(topic, message, 0)
 }
 
 func authWithDevice() error {
@@ -113,46 +126,17 @@ func fetchAdapterConfig() (*AdapterConfig, error) {
 	return config, nil
 }
 
-func SetConnectionStatus(status ConnectionStatus) error {
-	log.Println("[INFO] setConnectionStatus - Setting connection status")
+func PublishStatus(topic string, json []byte) (mqtt.Token, error) {
+	log.Printf("[INFO] PublishStatus - Setting status on topic: %s\n", topic)
 
-	//Retrieve the adapter configuration row
-	query := cb.NewQuery()
-	if Args.ServiceAccount != "" {
-		log.Printf("[DEBUG] setConnectionStatus - Fetching config row with adapter_name: %s\n", Args.ServiceAccount)
-		query.EqualTo("adapter_name", Args.ServiceAccount)
-	} else {
-		log.Printf("[DEBUG] setConnectionStatus - Fetching config row with adapter_name: %s\n", Args.DeviceName)
-		query.EqualTo("adapter_name", Args.DeviceName)
-	}
-
-	log.Println("[DEBUG] setConnectionStatus - Executing query against table " + Args.AdapterConfigCollection)
-	results, err := deviceClient.GetDataByName(Args.AdapterConfigCollection, query)
+	log.Printf("[DEBUG] PublishStatus - Publishing to topic %s\n", topic)
+	token, err := PublishGetToken(topic, json)
 	if err != nil {
-		log.Printf("[ERROR] setConnectionStatus - Error retrieving adapter configuration: %s\n", err.Error())
-		log.Println("[ERROR] setConnectionStatus - Retrying in 30 seconds...")
-		time.Sleep(time.Second * 30)
-		SetConnectionStatus(status)
-	}
-	data := results["DATA"].([]interface{})
-	changes := make(map[string]interface{})
-	if len(data) > 0 {
-		log.Println("[INFO] setConnectionStatus - Adapter config retrieved")
-
-		changes["connection_status"] = status
-
-		response, err := deviceClient.UpdateDataByName(Args.SystemKey, Args.AdapterConfigCollection, query, changes)
-		log.Printf("[INFO] setConnectionStatus - Updated %.0f row(s) in collection: %s", response.Count, Args.AdapterConfigCollection)
-		if err != nil {
-			log.Printf("[ERROR] setConnectionStatus - Error updating adapter configuration: %s\n", err.Error())
-			log.Println("[ERROR] setConnectionStatus - Retrying in 30 seconds...")
-			time.Sleep(time.Second * 30)
-			SetConnectionStatus(status)
-		}
+		log.Printf("[ERROR] Failed to publish MQTT message to topic %s: %s\n", topic, err.Error())
 	}
 
-	log.Printf("[DEBUG] setConnectionStatus - Successfully received, parsed, and updated adapter config: %+v\n", changes)
-	return nil
+	log.Printf("[DEBUG] PublishStatus - Successfully sent status message to topic: %s\n", topic)
+	return token, err
 }
 
 func onConnectLost(client mqtt.Client, connerr error) {
@@ -163,7 +147,7 @@ func onConnectLost(client mqtt.Client, connerr error) {
 }
 
 func onConnect(client mqtt.Client) {
-	log.Println("[INFO] OnConnect - Connected to ClearBlade Platform MQTT broker")
+	log.Println("[INFO] onConnect - Connected to ClearBlade Platform MQTT broker")
 	connChannel <- struct{}{}
 	if topic != "" && mqttCallback != nil {
 		// this is a bit fragile, relying on a specific error message text to check if error was lack of permissions or not, it it's not we want to retry,
