@@ -105,9 +105,6 @@ func ParseArguments(adapterName string) error {
 	if Args.ServiceAccount != "" && Args.ServiceAccountToken == "" {
 		return fmt.Errorf("Service Account Token is required when a Service Account is specified, this should have automatically been supplied. Check for typos then try again")
 	}
-	if Args.EdgeName != "" {
-		return fmt.Errorf("Edge Name is requied. Check for typos then try again")
-	}
 
 	log.Printf("[DEBUG] ParseArguments - Final arguments being used: %+v\n", Args)
 	return nil
