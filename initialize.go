@@ -26,6 +26,7 @@ type adapterArgs struct {
 	SystemKey               string
 	SystemSecret            string
 	DeviceName              string
+	EdgeName                string
 	ActiveKey               string
 	PlatformURL             string
 	MessagingURL            string
@@ -43,6 +44,7 @@ func ParseArguments(adapterName string) error {
 		SystemKey:               "",
 		SystemSecret:            "",
 		DeviceName:              adapterName,
+		EdgeName:                "",
 		ActiveKey:               "",
 		PlatformURL:             defaultPlatformURL,
 		MessagingURL:            defaultMessagingURL,
@@ -85,6 +87,10 @@ func ParseArguments(adapterName string) error {
 	if ok {
 		Args.ServiceAccountToken = token
 	}
+	edgeName, ok := os.LookupEnv("CB_EDGE_NAME")
+	if ok && Args.EdgeName == "" {
+		Args.EdgeName = edgeName
+	}
 
 	// verify all required fields are present
 	if Args.SystemKey == "" {
@@ -98,6 +104,9 @@ func ParseArguments(adapterName string) error {
 	}
 	if Args.ServiceAccount != "" && Args.ServiceAccountToken == "" {
 		return fmt.Errorf("Service Account Token is required when a Service Account is specified, this should have automatically been supplied. Check for typos then try again")
+	}
+	if Args.EdgeName != "" {
+		return fmt.Errorf("Edge Name is requied. Check for typos then try again")
 	}
 
 	log.Printf("[DEBUG] ParseArguments - Final arguments being used: %+v\n", Args)

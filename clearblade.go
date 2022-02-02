@@ -76,6 +76,7 @@ func fetchAdapterConfig() (*AdapterConfig, error) {
 
 	//Retrieve the adapter configuration row
 	query := cb.NewQuery()
+	query.EqualTo("edge_name", Args.EdgeName)
 	if Args.ServiceAccount != "" {
 		log.Printf("[DEBUG] fetchAdapterConfig - Fetching config row with adapter_name: %s\n", Args.ServiceAccount)
 		query.EqualTo("adapter_name", Args.ServiceAccount)
