@@ -76,6 +76,9 @@ func fetchAdapterConfig() (*AdapterConfig, error) {
 
 	//Retrieve the adapter configuration row
 	query := cb.NewQuery()
+	if Args.EdgeName != "" {
+		query.EqualTo("edge_name", Args.EdgeName)
+	}
 	if Args.ServiceAccount != "" {
 		log.Printf("[DEBUG] fetchAdapterConfig - Fetching config row with adapter_name: %s\n", Args.ServiceAccount)
 		query.EqualTo("adapter_name", Args.ServiceAccount)
@@ -131,9 +134,16 @@ func PublishStatus(topic string, json []byte) (mqtt.Token, error) {
 }
 
 func onConnectLost(client mqtt.Client, connerr error) {
-	log.Printf("[ERROR] onConnectLost - Connection to MQTT broker was lost: %s\n", connerr.Error())
-	if Args.ServiceAccount == "" {
-		log.Fatalln("[FATAL] onConnectLost - MQTT Connection was lost and no Device Service Account is being used. Stopping Adapter to force device reauth (this can be avoided by using Device Service Accounts)")
+	if Args.FatalOnDisconnect == "true" {
+		log.Fatalf("[FATAL] onConnectLost - Connection to MQTT broker was lost: %s\n", connerr.Error())
+		if Args.ServiceAccount == "" {
+			log.Fatalln("[FATAL] onConnectLost - MQTT Connection was lost and no Device Service Account is being used. Stopping Adapter to force device reauth (this can be avoided by using Device Service Accounts)")
+		}
+	} else {
+		log.Printf("[ERROR] onConnectLost - Connection to MQTT broker was lost: %s\n", connerr.Error())
+		if Args.ServiceAccount == "" {
+			log.Fatalln("[FATAL] onConnectLost - MQTT Connection was lost and no Device Service Account is being used. Stopping Adapter to force device reauth (this can be avoided by using Device Service Accounts)")
+		}
 	}
 }
 

@@ -14,6 +14,7 @@ const (
 	defaultPlatformURL             = "http://localhost:9000"
 	defaultMessagingURL            = "localhost:1883"
 	defaultAdapterConfigCollection = "adapter_config"
+	defaultFatalOnDisconnect       = "false"
 )
 
 var (
@@ -25,12 +26,14 @@ type adapterArgs struct {
 	SystemKey               string
 	SystemSecret            string
 	DeviceName              string
+	EdgeName                string
 	ActiveKey               string
 	PlatformURL             string
 	MessagingURL            string
 	AdapterConfigCollection string
 	ServiceAccount          string
 	ServiceAccountToken     string
+	FatalOnDisconnect       string
 }
 
 func ParseArguments(adapterName string) error {
@@ -41,12 +44,14 @@ func ParseArguments(adapterName string) error {
 		SystemKey:               "",
 		SystemSecret:            "",
 		DeviceName:              adapterName,
+		EdgeName:                "",
 		ActiveKey:               "",
 		PlatformURL:             defaultPlatformURL,
 		MessagingURL:            defaultMessagingURL,
 		AdapterConfigCollection: defaultAdapterConfigCollection,
 		ServiceAccount:          "",
 		ServiceAccountToken:     "",
+		FatalOnDisconnect:       defaultFatalOnDisconnect,
 	}
 
 	flag.StringVar(&Args.SystemKey, "systemKey", "", "system key (required)")
@@ -57,6 +62,7 @@ func ParseArguments(adapterName string) error {
 	flag.StringVar(&Args.MessagingURL, "messagingURL", defaultMessagingURL, "messaging URL (optional)")
 	flag.StringVar(&Args.LogLevel, "logLevel", defaultLogLevel, "The level of logging to use. Available levels are 'debug, 'info', 'warn', 'error', 'fatal' (optional)")
 	flag.StringVar(&Args.AdapterConfigCollection, "adapterConfigCollection", defaultAdapterConfigCollection, "The name of the data collection used to house adapter configuration (optional)")
+	flag.StringVar(&Args.FatalOnDisconnect, "fatalOnDisconnect", defaultFatalOnDisconnect, "Exit the application on MQTT connection lost. 'true' or 'false' (optional)")
 	flag.Parse()
 
 	setLoggingLevel(Args.LogLevel)
@@ -80,6 +86,10 @@ func ParseArguments(adapterName string) error {
 	token, ok := os.LookupEnv("CB_SERVICE_ACCOUNT_TOKEN")
 	if ok {
 		Args.ServiceAccountToken = token
+	}
+	edgeName, ok := os.LookupEnv("CB_EDGE_NAME")
+	if ok && Args.EdgeName == "" {
+		Args.EdgeName = edgeName
 	}
 
 	// verify all required fields are present
