@@ -12,5 +12,5 @@ require (
 require (
 	github.com/clearblade/go-utils v1.1.4 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
-	golang.org/x/net v0.0.0-20211101193420-4a448f8816b3 // indirect
+	golang.org/x/net v0.7.0 // indirect
 )
