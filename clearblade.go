@@ -68,7 +68,7 @@ func authWithServiceAccount() error {
 	return nil
 }
 
-func fetchAdapterConfig() (*AdapterConfig, error) {
+func FetchAdapterConfig() (*AdapterConfig, error) {
 	log.Println("[INFO] fetchAdapterConfig - Retrieving adapter config")
 	config := &AdapterConfig{
 		TopicRoot: Args.DeviceName,
@@ -93,7 +93,7 @@ func fetchAdapterConfig() (*AdapterConfig, error) {
 		log.Printf("[ERROR] fetchAdapterConfig - Error retrieving adapter configuration: %s\n", err.Error())
 		log.Println("[ERROR] fetchAdapterConfig - Retrying in 30 seconds...")
 		time.Sleep(time.Second * 30)
-		return fetchAdapterConfig()
+		return FetchAdapterConfig()
 	}
 	data := results["DATA"].([]interface{})
 	if len(data) > 0 {

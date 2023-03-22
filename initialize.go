@@ -129,7 +129,7 @@ func Initialize() (*AdapterConfig, error) {
 	}
 
 	// fetch adapter config
-	adapterConfig, err := fetchAdapterConfig()
+	adapterConfig, err := FetchAdapterConfig()
 	if err != nil {
 		return nil, err
 	}
