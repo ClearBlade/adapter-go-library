@@ -57,14 +57,16 @@ func PublishGetToken(topic string, message []byte) (mqtt.Token, error) {
 func authWithDevice() error {
 	log.Println("[INFO] authWithDevice - Authenticating with ClearBlade Edge or Platform as a Device")
 	log.Println("[ERROR] authWithDevice - This functionality is depreciated! Please use a Device Service Account instead")
-	deviceClient = cb.NewDeviceClientWithAddrs(Args.PlatformURL, Args.MessagingURL, Args.SystemKey, Args.SystemSecret, Args.DeviceName, Args.ActiveKey)
+	//Passing "" in place of system secret (deprecated since CB 9.38.0)
+	deviceClient = cb.NewDeviceClientWithAddrs(Args.PlatformURL, Args.MessagingURL, Args.SystemKey, "", Args.DeviceName, Args.ActiveKey)
 	_, err := deviceClient.Authenticate()
 	return err
 }
 
 func authWithServiceAccount() error {
 	log.Println("[INFO] authWithServiceAccount - Authenticating with ClearBlade Edge or Platform using a Service Account")
-	deviceClient = cb.NewDeviceClientWithServiceAccountAndAddrs(Args.PlatformURL, Args.MessagingURL, Args.SystemKey, Args.SystemSecret, Args.ServiceAccount, Args.ServiceAccountToken)
+	//Passing "" in place of system secret (deprecated since CB 9.38.0)
+	deviceClient = cb.NewDeviceClientWithServiceAccountAndAddrs(Args.PlatformURL, Args.MessagingURL, Args.SystemKey, "", Args.ServiceAccount, Args.ServiceAccountToken)
 	return nil
 }
 
@@ -73,7 +75,7 @@ func FetchAdapterConfig() (*AdapterConfig, error) {
 	config := &AdapterConfig{
 		TopicRoot: Args.DeviceName,
 	}
-
+	fmt.Printf("ANS EdgeName: %s\n", Args.EdgeName)
 	//Retrieve the adapter configuration row
 	query := cb.NewQuery()
 	if Args.EdgeName != "" {
@@ -99,7 +101,7 @@ func FetchAdapterConfig() (*AdapterConfig, error) {
 	if len(data) > 0 {
 		log.Println("[INFO] fetchAdapterConfig - Adapter config retrieved")
 		configData := data[0].(map[string]interface{})
-
+		fmt.Printf("ANS configData['topic_root']: %s\n", configData["topic_root"])
 		//MQTT topic root
 		if configData["topic_root"] != nil && configData["topic_root"] != "" {
 			config.TopicRoot = configData["topic_root"].(string)

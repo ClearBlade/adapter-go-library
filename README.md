@@ -64,7 +64,6 @@ All ClearBlade Adapters require a certain set of System specific variables to st
 | Name | CLI Flag | Environment Variable | Default |
 | --- | --- | --- | --- |
 | System Key | `systemKey` | `CB_SYSTEM_KEY` | N/A |
-| System Secret | `systemSecret` | `CB_SYSTEM_SECRET` | N/A |
 | Platform/Edge URL | `platformURL` | N/A | `http://localhost:9000` |
 | Platform/Edge Messaging URL | `messagingURL` | N/A | `localhost:1883` |
 | Device Name (**depreciated**) | `deviceName` | N/A | `adapterName` provided when calling `adapter_library.ParseArguments` |
@@ -74,7 +73,7 @@ All ClearBlade Adapters require a certain set of System specific variables to st
 | Log Level | `logLevel` | N/A | `info` |
 | Adapter Config Collection Name | `adapterConfigCollection` | N/A | `adapter_config` |
 
-A System Key and System Secret will always be required to start the adapter, and it's recommended to always use a Device Service Account & Token for Adapters. 
+A System Key will always be required to start the adapter, and it's recommended to always use a Device Service Account & Token for Adapters. 
 
 Device Name and Password for Adapters are **depreciated** and only provided for backwards compatibility and should not be used for any new adapters.
 
