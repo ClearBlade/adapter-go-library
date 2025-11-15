@@ -75,7 +75,7 @@ func FetchAdapterConfig() (*AdapterConfig, error) {
 	config := &AdapterConfig{
 		TopicRoot: Args.DeviceName,
 	}
-	fmt.Printf("ANS EdgeName: %s\n", Args.EdgeName)
+
 	//Retrieve the adapter configuration row
 	query := cb.NewQuery()
 	if Args.EdgeName != "" {
@@ -101,7 +101,7 @@ func FetchAdapterConfig() (*AdapterConfig, error) {
 	if len(data) > 0 {
 		log.Println("[INFO] fetchAdapterConfig - Adapter config retrieved")
 		configData := data[0].(map[string]interface{})
-		fmt.Printf("ANS configData['topic_root']: %s\n", configData["topic_root"])
+
 		//MQTT topic root
 		if configData["topic_root"] != nil && configData["topic_root"] != "" {
 			config.TopicRoot = configData["topic_root"].(string)
