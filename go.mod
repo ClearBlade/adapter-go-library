@@ -1,6 +1,6 @@
 module github.com/clearblade/adapter-go-library
 
-go 1.20
+go 1.24.0
 
 require (
 	github.com/clearblade/Go-SDK v0.0.0-20220811134357-78291979ad51
@@ -12,5 +12,5 @@ require (
 require (
 	github.com/clearblade/go-utils v1.1.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/net v0.27.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
 )
