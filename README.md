@@ -64,20 +64,14 @@ All ClearBlade Adapters require a certain set of System specific variables to st
 | Name | CLI Flag | Environment Variable | Default |
 | --- | --- | --- | --- |
 | System Key | `systemKey` | `CB_SYSTEM_KEY` | N/A |
-| System Secret | `systemSecret` | `CB_SYSTEM_SECRET` | N/A |
 | Platform/Edge URL | `platformURL` | N/A | `http://localhost:9000` |
 | Platform/Edge Messaging URL | `messagingURL` | N/A | `localhost:1883` |
-| Device Name (**depreciated**) | `deviceName` | N/A | `adapterName` provided when calling `adapter_library.ParseArguments` |
-| Device Password/Active Key (**depreciated)** | `password` | N/A | N/A |
 | Device Service Account | N/A | `CB_SERVICE_ACCOUNT` | N/A |
 | Device Service Account Token | N/A | `CB_SERVICE_ACCOUNT_TOKEN` | N/A |
 | Log Level | `logLevel` | N/A | `info` |
 | Adapter Config Collection Name | `adapterConfigCollection` | N/A | `adapter_config` |
 
-A System Key and System Secret will always be required to start the adapter, and it's recommended to always use a Device Service Account & Token for Adapters. 
-
-Device Name and Password for Adapters are **depreciated** and only provided for backwards compatibility and should not be used for any new adapters.
-
+A System Key will always be required to start the adapter, and it's recommended to always use a Device Service Account & Token for Adapters. 
 
 ## Adapter Configuration & Settings
 This library does require the use of an Adapter Configuration Collection. This allows you to easily provide configuration options to your adapter at runtime via this Collection, rather than command line arguments, environment variables, or hardcoded values in your adapter. 
@@ -98,8 +92,5 @@ This adapter introduces some basic logging level that your adapter can also leve
 The supported log levels are `DEBUG`, `INFO`, `ERROR`, and `FATAL`.
 
 ## Fatal Errors
-There are a few cases where this library will encounter a fatal error and cause your adapter to quit. A log with more information will be provided, but as a heads up these are the current cases that will cause the adapter to exit from within the library:
-
-1. If your adapter subscribes to a topic and the device account used by the adapter does not have subscribe permissions on this topic
-2. If you are using a **depreciated** device name and password for authentication and MQTT disconnects for any reason. This is to force the adapter to reauth with the Platform/Edge incase the current auth token has reached it's TTL or the session has been manually removed.
+There are a few cases where this library will encounter a fatal error and cause your adapter to quit. A log with more information will be provided (e.g. If your adapter subscribes to a topic and the device account used by the adapter does not have subscribe permissions on this topic)
 

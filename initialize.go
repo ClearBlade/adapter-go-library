@@ -24,7 +24,6 @@ var (
 type adapterArgs struct {
 	LogLevel                string
 	SystemKey               string
-	SystemSecret            string
 	DeviceName              string
 	EdgeName                string
 	ActiveKey               string
@@ -42,7 +41,6 @@ func ParseArguments(adapterName string) error {
 	Args = adapterArgs{
 		LogLevel:                defaultLogLevel,
 		SystemKey:               "",
-		SystemSecret:            "",
 		DeviceName:              adapterName,
 		EdgeName:                "",
 		ActiveKey:               "",
@@ -55,7 +53,6 @@ func ParseArguments(adapterName string) error {
 	}
 
 	flag.StringVar(&Args.SystemKey, "systemKey", "", "system key (required)")
-	flag.StringVar(&Args.SystemSecret, "systemSecret", "", "system secret (required)")
 	flag.StringVar(&Args.DeviceName, "deviceName", adapterName, "name of device (optional)")
 	flag.StringVar(&Args.ActiveKey, "password", "", "password (or active key) for device authentication (required)")
 	flag.StringVar(&Args.PlatformURL, "platformURL", defaultPlatformURL, "platform url (optional)")
@@ -72,11 +69,6 @@ func ParseArguments(adapterName string) error {
 	if ok && Args.SystemKey == "" {
 		Args.SystemKey = sysKey
 		log.Println("[DEBUG] Using ClearBlade System Key From Environment Variable")
-	}
-	sysSec, ok := os.LookupEnv("CB_SYSTEM_SECRET")
-	if ok && Args.SystemSecret == "" {
-		Args.SystemSecret = sysSec
-		log.Println("[DEBUG] Using ClearBlade System Secret From Environment Variable")
 	}
 	servAcc, ok := os.LookupEnv("CB_SERVICE_ACCOUNT")
 	if ok {
@@ -95,9 +87,6 @@ func ParseArguments(adapterName string) error {
 	// verify all required fields are present
 	if Args.SystemKey == "" {
 		return fmt.Errorf("System Key is required, can be supplied with --systemKey flag or CB_SYSTEM_KEY environment variable")
-	}
-	if Args.SystemSecret == "" {
-		return fmt.Errorf("System Secret is required, can be supplied with --systemSecret flag or CB_SYSTEM_SECRET environment variable")
 	}
 	if Args.ActiveKey == "" && Args.ServiceAccount == "" {
 		return fmt.Errorf("Device Password is required when not using a Service Account, can be supplied with --password flag")

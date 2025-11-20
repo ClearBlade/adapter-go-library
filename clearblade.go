@@ -56,15 +56,17 @@ func PublishGetToken(topic string, message []byte) (mqtt.Token, error) {
 
 func authWithDevice() error {
 	log.Println("[INFO] authWithDevice - Authenticating with ClearBlade Edge or Platform as a Device")
-	log.Println("[ERROR] authWithDevice - This functionality is depreciated! Please use a Device Service Account instead")
-	deviceClient = cb.NewDeviceClientWithAddrs(Args.PlatformURL, Args.MessagingURL, Args.SystemKey, Args.SystemSecret, Args.DeviceName, Args.ActiveKey)
+	log.Println("[ERROR] authWithDevice - This functionality is deprecated! Please use a Device Service Account instead")
+	//Passing "" in place of system secret (deprecated since CB 9.38.0)
+	deviceClient = cb.NewDeviceClientWithAddrs(Args.PlatformURL, Args.MessagingURL, Args.SystemKey, "", Args.DeviceName, Args.ActiveKey)
 	_, err := deviceClient.Authenticate()
 	return err
 }
 
 func authWithServiceAccount() error {
 	log.Println("[INFO] authWithServiceAccount - Authenticating with ClearBlade Edge or Platform using a Service Account")
-	deviceClient = cb.NewDeviceClientWithServiceAccountAndAddrs(Args.PlatformURL, Args.MessagingURL, Args.SystemKey, Args.SystemSecret, Args.ServiceAccount, Args.ServiceAccountToken)
+	//Passing "" in place of system secret (deprecated since CB 9.38.0)
+	deviceClient = cb.NewDeviceClientWithServiceAccountAndAddrs(Args.PlatformURL, Args.MessagingURL, Args.SystemKey, "", Args.ServiceAccount, Args.ServiceAccountToken)
 	return nil
 }
 
